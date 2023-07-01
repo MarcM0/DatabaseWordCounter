@@ -1,4 +1,3 @@
-import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor
 import re
 import csv
@@ -8,6 +7,7 @@ import numpy as np
 import time
 import traceback
 from tqdm import tqdm
+import json
 
 #get list of words
 def getWords(text):
@@ -23,34 +23,21 @@ def getWords(text):
     return text
 
 #get brief_summary and detailed_description
-def getSectionsWeWant(filepath):    
-
-    parsed = ET.parse(filepath)
-    root = parsed.getroot()
-    sectionsToProcess = []
-    sectionsToProcess.append(root.findall('brief_summary'))
-    sectionsToProcess.append(root.findall('detailed_description'))
-
-    text = ""
-    for section in sectionsToProcess:
-        assert(len(section)==1 or len(section)==0)
-        if(len(section)==0):continue
-        section = section[0]
-        sectionText = section.findall('textblock')
-        assert(len(sectionText)==1)
-        sectionText = sectionText[0].text
-        text += "\n" + sectionText
-    
-    assert(text!="")
+def getSectionsWeWant(filepath):  
+    with open(filepath, "r", encoding="utf8") as f:
+        data = json.load(f)
+        description = data["protocolSection"]["descriptionModule"]
+        text=description.get('briefSummary', "") + "\n" + data.get('detailedDescription', "")    
+        assert(text.strip()!="")
     
     return text
     
 
 #what each thread will do
-#get a nice word list of the sections we want from an xml file
+#get a nice word list of the sections we want from an json file
 def preProcessItem(inputItem):
         try:
-            filepath = os.path.join(os.getcwd(),"search_results",inputItem["NCTNum"]+".xml")
+            filepath = os.path.join(os.getcwd(),"search_results",inputItem["NCTNum"]+".json")
             text = getSectionsWeWant(filepath)
             words = getWords(text)
             inputItem["words"] = words
@@ -66,8 +53,11 @@ def main():
     startTime = time.time()
     print("Starting")
 
-    wordsWeWant = ["ptsd","loneliness","depression","anxiety"] 
+    wordsWeWant = "Depression,dysthymia,anxiety,stress,distress,PTSD" #None
+    
     if(wordsWeWant is not None):
+        wordsWeWant = getWords(wordsWeWant)
+        print("Edited wordswewant list to look like the following:",wordsWeWant)
         wordsWeWant = [wordInList.lower() for wordInList in wordsWeWant] #lowercase
 
     #change directory to current file path
@@ -90,9 +80,9 @@ def main():
         if(type(year) != str):
             year = "No "+yearKeyToLookFor
         else:
-            year=year[-4:]
+            year=year[:4]
 
-        status = row["Status"]
+        status = row["Study Status"]
         NCTNum = row["NCT Number"]
 
         #prepare output
@@ -108,7 +98,7 @@ def main():
 
 
     print("Starting file reads, total current runtime:",time.time()-startTime)
-    #read all the xml files and get word lists
+    #read all the json files and get word lists
     numThreads = 4
     with ThreadPoolExecutor(numThreads) as executor:
         toWaitFor = []
@@ -150,7 +140,7 @@ def main():
     
     
     #format data
-    colTitles = ["word","number of mentions","Avg percent of mentions per study","num studies in year mentioning word"]
+    colTitles = ["word","number of mentions","Avg percent of mentions per study","percent of studies in year mentioning word"]
     colsPerYear = len(colTitles)
     for statusKey,statusVal in statuses.items():
 
@@ -175,8 +165,7 @@ def main():
             sortedWords = sorted(yearVal.items(), key=lambda item: item[1][0],reverse =True)
             for row,(wordKey,wordVal) in enumerate(sortedWords):
                 #for average, divide by number of studies in group (not len(wordVal[1]) since wordVal[1] has no entries of 0%)
-                avgPercent = str(sum(wordVal[1])/yearValArr[1])
-                output[row+2,col:col+colsPerYear]=[wordKey,wordVal[0],avgPercent+"%",wordVal[2]]
+                output[row+2,col:col+colsPerYear]=[wordKey,wordVal[0],str(sum(wordVal[1])/yearValArr[1])+"%",str(wordVal[2]/yearValArr[1])+"%"]
     
         #save the excel sheet with name of status
         with open(os.path.join(outputDir,statusKey+'.csv'), 'w', newline='', encoding="utf-8-sig") as fp:
