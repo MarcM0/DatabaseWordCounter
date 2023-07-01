@@ -45,7 +45,7 @@ def main():
             else:
                 year = "2020AndBeyond"
 
-        status = row["Study Status"]
+        status = row["Study Status"].upper()
         NCTNum = row["NCT Number"]
 
         #filter statuses we dont want

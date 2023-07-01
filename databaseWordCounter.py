@@ -82,7 +82,7 @@ def main():
         else:
             year=year[:4]
 
-        status = row["Study Status"]
+        status = row["Study Status"].upper()
         NCTNum = row["NCT Number"]
 
         #prepare output
