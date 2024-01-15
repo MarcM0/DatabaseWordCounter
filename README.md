@@ -1,12 +1,12 @@
 # Skin Cancer Database Word Counter
-Script to analyze word usage in the U.S. National Library of Medicine ClinicalTrials.gov database. The keyword used was “Skin Cancer”. From this search, we downloaded the summary of the results in a csv file (SearchResults_1.csv), then the details of each study as json files (search_results.zip). 
+Script to analyze word usage in the U.S. National Library of Medicine ClinicalTrials.gov database. The keyword used was “Skin Cancer”. From this search, we downloaded the summary of the results in a csv file (ctg-studies.csv), then the details of each study as json files (ctg-studies.json.zip). 
 
 Expected outputs are given in the "Output" folder for convenience. 
 If you wish to filter for specific words, change the "wordsWeWant" variable in databaseWordCounter.py, then rerun(examples given in the comments on that line). 
 If you wish to rerun the program, follow the instructions below.
 
 To run:
-- extract search_results.zip into a folder called "search_results"
+- extract ctg-studies.json.zip into a folder called "ctg-studies"
 - Delete the "Output" folder
 - Install python 3.11 (https://www.python.org/downloads/release/python-3110/). 
 - Then, in the terminal, run

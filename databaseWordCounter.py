@@ -37,7 +37,7 @@ def getSectionsWeWant(filepath):
 #get a nice word list of the sections we want from an json file
 def preProcessItem(inputItem):
         try:
-            filepath = os.path.join(os.getcwd(),"search_results",inputItem["NCTNum"]+".json")
+            filepath = os.path.join(os.getcwd(),"ctg-studies",inputItem["NCTNum"]+".json")
             text = getSectionsWeWant(filepath)
             words = getWords(text)
             inputItem["words"] = words
@@ -72,7 +72,7 @@ def main():
     #read original csv
     statuses = dict()
     toGet = []
-    inputFile = os.path.abspath("./SearchResults_1.csv")
+    inputFile = os.path.abspath("./ctg-studies.csv")
     inputDF = pd.read_csv(inputFile, engine='python').dropna(how="all")
     for index, row in inputDF.iterrows():
         yearKeyToLookFor = "Start Date"

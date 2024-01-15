@@ -29,7 +29,7 @@ def main():
     toGet = []
     statusesWeWant = ["RECRUITING","ENROLLING_BY_INVITATION","ACTIVE_NOT_RECRUITING","COMPLETED"]
     statusesExcluded = []
-    inputFile = os.path.abspath("./SearchResults_1.csv")
+    inputFile = os.path.abspath("./ctg-studies.csv")
     inputDF = pd.read_csv(inputFile, engine='python').dropna(how="all")
     for index, row in inputDF.iterrows():
         yearKeyToLookFor = "Start Date"
@@ -70,7 +70,7 @@ def main():
     }
     #read all the json files and get stats
     for item in toGet:
-        filepath = os.path.join(os.getcwd(),"search_results",item["NCTNum"]+".json")
+        filepath = os.path.join(os.getcwd(),"ctg-studies",item["NCTNum"]+".json")
         with open(filepath, "r", encoding="utf8") as f:
             jsonData = json.load(f)
 
